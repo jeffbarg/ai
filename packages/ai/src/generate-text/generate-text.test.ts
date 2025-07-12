@@ -1,4 +1,5 @@
 import {
+  APICallError,
   LanguageModelV2CallOptions,
   LanguageModelV2FunctionTool,
   LanguageModelV2Prompt,
@@ -2707,7 +2708,14 @@ describe('generateText', () => {
         doGenerate: async () => {
           attempt++;
           if (attempt < 3) {
-            throw new Error('API error');
+            // Throw a retryable API error
+            throw new APICallError({
+              message: 'Rate limited',
+              url: 'https://api.example.com',
+              requestBodyValues: {},
+              statusCode: 429,
+              isRetryable: true,
+            });
           }
           return {
             ...dummyResponseValues,
